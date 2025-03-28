@@ -16,7 +16,7 @@ doc = Document()
 doc.styles['Normal'].font.name = 'Times New Roman'
 doc.styles['Normal']._element.rPr.rFonts.set(qn('w:eastAsia'), '宋体')
 # -----以上请勿改动--------------------------------------------------------------
-name = 'qpx'
+name = 'lihua'#一般将实验者姓名作为.csv的命名，如:李华做了实验则干燥无喷淋液文件命名为lihua干燥.xlsx，水位吸收液命名为lihua水.xlsx
 # ------以下请勿改动-------------------------------------------------------------
 
 geshi = '.xlsx'
