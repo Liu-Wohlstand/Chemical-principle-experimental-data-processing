@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 import random
-
-bengtexingceding = 'wxw.csv'#离心泵性能曲线
-guanlutexingceding = 'wxw2.csv'#管路性能曲线
+#一般将实验者姓名作为.csv的命名，如:李华做了实验则泵性能文件命名为lihua.csv，管性能命名为lihua2.csv
+bengtexingceding = 'lihua.csv'#离心泵性能曲线
+guanlutexingceding = 'lihua2.csv'#管路性能曲线
 k = 77.914 * 1000  # 单位为 “次每升” *1000后为次每立方米
 #---以下请勿改动---------------------------------------------------
 
