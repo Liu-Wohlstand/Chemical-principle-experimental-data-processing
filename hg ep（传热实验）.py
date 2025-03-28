@@ -14,7 +14,7 @@ matplotlib.rcParams['font.family'] = 'SimSun'  # 'SimSun' 是宋体
 matplotlib.rcParams['axes.unicode_minus'] = False
 
 # -----以上请勿改动--------------------------------------------------------------
-name = 'yh'
+name = 'lihua'#一般将实验者姓名作为.csv的命名，如:李华做了实验则普通管文件命名为lihua.csv，强化管命名为lihua2.csv
 # ------以下请勿改动-------------------------------------------------------------
 geshi = '.csv'
 qianghuaguan = name + geshi
