@@ -1,0 +1,384 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.interpolate import UnivariateSpline
+from matplotlib.font_manager import FontProperties
+import matplotlib
+
+times_new_roman = FontProperties(family='Times New Roman')
+matplotlib.rcParams['font.family'] = 'SimSun'  # 'SimSun' 是宋体
+matplotlib.rcParams['axes.unicode_minus'] = False
+# ------全回流实验--------------------------------------------------------------------------------------------------------
+ding_zheguanglv = 1.369  # 塔顶
+fu_zheguanglv = 1.382 # 塔釜
+# ------部分回流实验------------------------------------------------------------------------------------------------------
+ding_zheguanglv2 = 1.369  # 塔顶
+fu_zheguanglv2 = 1.383  # 塔釜
+liao_zheguanglv = 1.371  # 进料
+tF = 22.1
+
+
+'''示例数据
+ding_zheguanglv = 1.3651  # 塔顶
+fu_zheguanglv = 1.3759  # 塔釜
+# ------部分回流实验------------------------------------------------------------------------------------------------------
+ding_zheguanglv2 = 1.3659  # 塔顶
+fu_zheguanglv2 = 1.3758  # 塔釜
+liao_zheguanglv = 1.3735  # 进料
+tF = 24.5  # 进料温度
+R = 4  # 回流比# 进料温度'''
+'''示例数据
+ding_zheguanglv = 1.3659  # 塔顶
+fu_zheguanglv = 1.3790  # 塔釜
+# ------部分回流实验------------------------------------------------------------------------------------------------------
+ding_zheguanglv2 = 1.3665  # 塔顶
+fu_zheguanglv2 = 1.3799  # 塔釜
+liao_zheguanglv = 1.3734  # 进料
+tF = 24.5  # 进料温度'''
+'''示例数据
+ding_zheguanglv = 1.3659  # 塔顶
+fu_zheguanglv = 1.3785  # 塔釜
+# ------部分回流实验------------------------------------------------------------------------------------------------------
+ding_zheguanglv2 = 1.3665  # 塔顶
+fu_zheguanglv2 = 1.3788  # 塔釜
+liao_zheguanglv = 1.3742  # 进料
+tF = 24.5  # 进料温度'''
+"""示例数据
+ding_zheguanglv = 1.3712  # 塔顶
+fu_zheguanglv = 1.3799  # 塔釜
+# ------部分回流实验------------------------------------------------------------------------------------------------------
+ding_zheguanglv2 = 1.373  # 塔顶
+fu_zheguanglv2 = 1.3800  # 塔釜
+liao_zheguanglv = 1.3781  # 进料
+tF = 21  # 进料温度
+R = 4  # 回流比
+NT = 7  # 实际塔板数"""
+'''示例数据
+ding_zheguanglv = 1.381  # 塔顶
+fu_zheguanglv = 1.369  # 塔釜
+# ------部分回流实验------------------------------------------------------------------------------------------------------
+ding_zheguanglv2 = 1.369  # 塔顶
+fu_zheguanglv2 = 1.380  # 塔釜
+liao_zheguanglv = 1.377  # 进料
+tF = 22.2  # 进料温度
+R = 4  # 回流比'''
+# ------以下切勿改动------------------------------------------------------------------------------------------------------
+size = 6
+MA = 46
+MB = 60
+R = 4  # 回流比
+NT = 7  # 实际塔板
+
+
+def chazhi(T, dic, i):
+    if i == 'n':
+        if T in dic:
+            return dic[T]
+        sorted_keys = sorted(dic.keys())
+        lower_key = None
+        upper_key = None
+        for key in sorted_keys:
+            if key < T:
+                lower_key = key
+            else:
+                upper_key = key
+                break
+        if lower_key is None or upper_key is None:
+            return f"插值无法计算，T超出字典{dic}键的范围"
+        lower_value = dic[lower_key]
+        upper_value = dic[upper_key]
+        interpolation = (T - lower_key) * (upper_value - lower_value) / (upper_key - lower_key) + lower_value
+        return interpolation
+    if T in dic:
+        return dic[T][i]
+    sorted_keys = sorted(dic.keys())
+    lower_key = None
+    upper_key = None
+    for key in sorted_keys:
+        if key < T:
+            lower_key = key
+        else:
+            upper_key = key
+            break
+    if lower_key is None or upper_key is None:
+        return f"插值无法计算，T超出字典{dic}键的范围"
+    lower_value = dic[lower_key][i]
+    upper_value = dic[upper_key][i]
+    interpolation = (T - lower_key) * (upper_value - lower_value) / (upper_key - lower_key) + lower_value
+    return interpolation
+
+
+def chazhixian(x, y):
+    spline = UnivariateSpline(x, y, s=0.01)
+    xnew = np.linspace(x.min(), x.max(), 300)
+    ynew = spline(xnew)
+    return xnew, ynew
+
+
+dic_zheguanglv = {1.3827: 0, 1.3815: 0.05052, 1.3797: 0.1974, 1.3750: 0.2950, 1.3730: 0.3977, 1.3705: 0.4970,
+                  1.3680: 0.5990, 1.3667: 0.6445, 1.3658: 0.7101, 1.3640: 0.7983, 1.3628: 0.8442, 1.3618: 0.9064,
+                  1.3606: 0.9509, 1.3589: 1}
+
+
+def zhiliangfenlv_yichun(nd):
+    W = 58.844116 - 42.61325 * nd
+    if W < 0:
+        W = chazhi(nd, dic_zheguanglv, 'n')
+    print(f'{nd}折射率下的乙醇质量分率为{W:.3f}')
+    XA = (W / MA) / ((W / MA) + ((1 - W) / MB))
+    print(f'{nd}折射率下的乙醇液相摩尔分率为{XA:.3f}')
+    print()
+    return XA
+
+
+dic_txy = {0: [0, 97.60],
+           0.126: [0.240, 93.85],
+           0.188: [0.318, 92.66],
+           0.210: [0.349, 91.60],
+           0.358: [0.550, 88.32],
+           0.461: [0.650, 86.25],
+           0.546: [0.711, 84.98],
+           0.6: [0.76, 84.13],
+           0.663: [0.799, 83.06],
+           0.884: [0.914, 80.5],
+           1: [1, 78.38]}
+ls_XA_xiangtu = list(dic_txy.keys())
+ls_YA_xiangtu = [value[0] for value in dic_txy.values()]
+
+ls_XA = [zhiliangfenlv_yichun(ding_zheguanglv), zhiliangfenlv_yichun(fu_zheguanglv),
+         zhiliangfenlv_yichun(ding_zheguanglv2), zhiliangfenlv_yichun(fu_zheguanglv2),
+         zhiliangfenlv_yichun(liao_zheguanglv)]
+
+ls_y = []
+ls_tBP = []
+
+ls_XB = 1 - np.array(ls_XA)
+r_ethonal = 845.2  # kJ/kg 乙醇气化潜热
+r_propanol = 688.6  # 丙醇气化潜热
+
+Cp_ethonal = {
+    5: 2.44,
+    10: 2.53,
+    15: 2.61,
+    20: 2.69,
+    25: 2.76,
+    30: 2.83,
+    35: 2.90,
+    40: 2.97,
+    45: 3.03,
+    50: 3.09,
+    55: 3.15,
+    60: 3.21,
+    65: 3.26,
+    70: 3.32,
+    75: 3.37,
+    80: 3.42,
+    85: 3.47,
+    90: 3.52,
+    95: 3.57,
+    100: 3.61
+}
+'''Cp_propanol = {
+    0: 2.535,
+    20: 2.535 + 0.15 * 2,
+    30: 2.535 + 0.15 * 3,
+    40: 2.535 + 0.15 * 4,
+    50: 2.535 + 0.15 * 5,
+    60: 2.535 + 0.15 * 6,
+    70: 2.535 + 0.15 * 7,
+    80: 2.535 + 0.15 * 8,
+    90: 2.535 + 0.15 * 9,
+    100: 2.535 + 0.15 * 10,
+    200: 2.535 + 0.15 * 20,
+    400: 3.3173
+}'''
+Cp_propanol = {
+    20: 2.4,
+    30: 2.5,
+    40: 2.6,
+    50: 2.7,
+    60: 2.8,
+    70: 2.9,
+    80: 3,
+    90: 3.1,
+    100: 3.2,
+}
+ls_zheshelv_name = ['全回流塔顶', '全回流塔釜', '部分回流塔顶', '部分回流塔釜', '部分回流进料']
+for i in range(len(ls_XA)):
+
+    ls_tBP.append(chazhi(ls_XA[i], dic_txy, 1))
+    if i == 4:
+        print(f'{ls_XA[i]:.3f}摩尔分数下 混合物泡点温度tBP={chazhi(ls_XA[i], dic_txy, 1):.3f}℃')
+        print()
+
+        print('平均温度：{:.2f} ℃'.format((ls_tBP[i] + tF) / 2))
+
+        print('乙醇的比热容为{:.3f} kJ/(℃·kmol)'.format(chazhi((ls_tBP[i] + tF) / 2, Cp_ethonal, 'n')))
+
+        print('丙醇的比热容为{:.3f} kJ/(℃·kmol)'.format(chazhi((ls_tBP[i] + tF)/2, Cp_propanol,'n')))
+
+        Cpm = chazhi((ls_tBP[i] + tF) / 2, Cp_ethonal, 'n') * MA * ls_XA[i] + chazhi((ls_tBP[i] + tF)/2, Cp_propanol,
+                                                                                     'n') * MB * (1 - ls_XA[i])
+        print(f'{ls_XA[i]:.3f}摩尔分数下 混合物平均温度下Cpm={Cpm:.3f} kJ/(℃·kmol)')
+        rm = r_ethonal * MA * ls_XA[i] + r_propanol * MB * (1 - ls_XA[i])
+        print(f'{ls_XA[i]:.3f}摩尔分数下 混合物汽化潜热rm={rm:.3f} kJ/kmol')
+        q = (Cpm * (ls_tBP[i] - tF) + rm) / rm
+        print(f'{ls_XA[i]:.3f}摩尔分数下 混合物进料热状况参数q={q:.3f}   （q无量纲）')
+# ----全回流-------------------------------------------
+plt.figure(figsize=(size, size))
+x, y = chazhixian(np.array(ls_XA_xiangtu), ls_YA_xiangtu)
+plt.scatter(ls_XA_xiangtu, ls_YA_xiangtu)
+plt.plot(x, y)
+plt.plot([0, 1], [0, 1])
+plt.xlim(0, 1)
+plt.ylim(0, 1)
+plt.xlabel('液相组成xa')
+plt.ylabel('气相组成ya')
+plt.title('乙醇-正丙醇相图')
+
+
+def find_closest_index(a, b, target):
+    idx = min(range(len(a)), key=lambda i: abs(a[i] - target))
+    return b[idx]
+
+
+plt.plot([ls_XA[0], ls_XA[0]], [0, ls_XA[0]], linestyle='--', color='red')  # 塔顶
+plt.plot([ls_XA[1], ls_XA[1]], [0, find_closest_index(x, y, ls_XA[1])], linestyle='--', color='red')  # 塔釜
+
+
+def quanhuiliu_zhexian(x_break):
+    x_zheqi = x_break
+    y_zheqi = x_zheqi
+    x_zhezhong = find_closest_index(y, x, y_zheqi)
+    y_zhezhong = x_zhezhong
+    x_break_break = x_zhezhong
+    plt.plot([x_zhezhong, x_zheqi], [y_zheqi, y_zheqi], color='green')
+    plt.plot([x_zhezhong, x_zhezhong], [y_zhezhong, y_zheqi], color='green')
+    return x_break_break
+
+
+x_break = ls_XA[0]
+js = 0
+while x_break > ls_XA[1]:
+    x_break = quanhuiliu_zhexian(x_break)
+    js += 1
+
+if js == 0:
+    print('请检查数据输入是否有误')
+else:
+    print(f'全回流实验：')
+    print(f'理论塔板数 {js}-1={js-1}块（此处扣除1为塔底恒沸板）')  # 正好理论塔板数等于该函数执行次数
+    print(f'塔板效率 Er={(js-1) / NT * 100:.2f}%')
+
+'''while True:
+    x_break=zhexian(ls_XA[0])
+    if x_break<=ls_XA[1]:
+        break'''
+
+plt.show()
+# ----部分回流-------------------------------------------
+print('部分回流实验：')
+plt.figure(figsize=(size, size))
+x, y = chazhixian(np.array(ls_XA_xiangtu), ls_YA_xiangtu)
+plt.plot(x, y)
+plt.plot([0, 1], [0, 1])
+plt.xlim(0, 1)
+plt.ylim(0, 1)
+plt.plot([ls_XA[2], ls_XA[2]], [0, ls_XA[2]], linestyle='--', color='red')  # 塔顶
+plt.plot([ls_XA[3], ls_XA[3]], [0, find_closest_index(x, y, ls_XA[3])], linestyle='--', color='red')  # 塔釜
+
+
+# q线方程：
+def q_(x_f):
+    x = np.linspace(x_f - 0.01, x_f + 0.01 + 0.3, 1000)
+    y = (q / (q - 1)) * x - x_f / (q - 1)
+    plt.plot(x, y, color='purple', label='q线')
+    print(f'q线方程：y={(q / (q - 1)):.3f}x+{- x_f / (q - 1):.3f}')
+    return x, y
+
+
+x_q, y_q = q_(ls_XA[4])
+
+
+# 精馏线方程：
+def caozuo(x_d):
+    x = np.arange(0, ls_XA[2], 0.001)
+    y = (R / (R + 1)) * x + x_d / (R + 1)  # x_d为塔顶组成
+    plt.plot(x, y, color='brown', label='精馏线')
+    print(f'操作线方程：y={(R / (R + 1)):.3f}x+{x_d / (R + 1):.3f}')
+    return x, y
+
+
+x_caozuo, y_caozuo = caozuo(ls_XA[2])
+
+
+def solve_linear_equations(a1, b1, a2, b2):
+    if a1 == a2 and b1 == b2:
+        return "直线重合"
+    if a1 == a2:
+        return None
+    x = (b2 - b1) / (a1 - a2)
+    y = a1 * x + b1
+    return x, y
+
+
+x_intersection, y_intersection = solve_linear_equations((q / (q - 1)), -ls_XA[4] / (q - 1), (R / (R + 1)),
+                                                        ls_XA[2] / (R + 1))
+
+print(f"交点坐标：({x_intersection:.3f}, {y_intersection:.3f})")
+
+#  提馏线
+plt.plot([ls_XA[3], x_intersection], [ls_XA[3], y_intersection], color='blue', label='提馏线')
+x_tiliu = np.linspace(ls_XA[3], x_intersection, 1000)
+y_tiliu = np.linspace(ls_XA[3], y_intersection, 1000)
+x_break = ls_XA[2]
+
+
+def bufenhuiliu_caozuo_zhexian(x_break):
+    x_zheqi = x_break
+    y_zheqi = find_closest_index(x_caozuo, y_caozuo, x_zheqi)
+    x_zhezhong = find_closest_index(y, x, y_zheqi)
+    y_zhezhong = find_closest_index(x_caozuo, y_caozuo, x_zhezhong)
+    x_break_break = x_zhezhong
+    plt.plot([x_zhezhong, x_zheqi], [y_zheqi, y_zheqi], color='green')
+    plt.plot([x_zhezhong, x_zhezhong], [y_zhezhong, y_zheqi], color='green')
+    return x_break_break, y_zhezhong
+
+
+def bufenhuiliu_tiliu_zhexian(x_break):
+    x_zheqi = x_break
+    y_zheqi = find_closest_index(x_tiliu, y_tiliu, x_zheqi)
+    x_zhezhong = find_closest_index(y, x, y_zheqi)
+    y_zhezhong = find_closest_index(x_tiliu, y_tiliu, x_zhezhong)
+    x_break_break = x_zhezhong
+    plt.plot([x_zhezhong, x_zheqi], [y_zheqi, y_zheqi], color='green')
+    plt.plot([x_zhezhong, x_zhezhong], [y_zhezhong, y_zheqi], color='green')
+    return x_break_break, y_zheqi, y_zhezhong
+
+
+js2 = 0
+while x_break > x_intersection:
+    x_break, y_zhezhong = bufenhuiliu_caozuo_zhexian(x_break)
+    js2 += 1
+
+
+x_break_zhong = x_break
+while x_break > ls_XA[3]:
+    x_break, y_zheqi, y_zhezhong2 = bufenhuiliu_tiliu_zhexian(x_break)
+    js2 += 1
+
+if js == 0:
+    print('请检查数据输入是否有误')
+else:
+    print(f'理论塔板数 {js2}-1={js2-1}块（此处扣除1为塔底恒沸板）')
+    print(f'塔板效率 Er={(js2-1) / NT * 100:.2f}%')
+plt.plot([x_break_zhong, x_break_zhong], [y_zhezhong, find_closest_index(x_tiliu, y_tiliu, x_break_zhong)],
+         color='green')
+if x_break < ls_XA[3]:
+    plt.plot([x_break, x_break], [y_zhezhong2, x_break], color='green')
+plt.title('乙醇-正丙醇相图')
+plt.xlabel('液相组成 xa')
+plt.ylabel('气相组成 ya')
+plt.grid()
+plt.legend()
+plt.scatter(ls_XA_xiangtu, ls_YA_xiangtu)
+plt.show()
